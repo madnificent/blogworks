@@ -1,0 +1,5 @@
+h1. blogworks
+
+BlogWorks is a blogging system built on top of clayworks.  Altough it should work, it's still very rough and mainly serves as an example of a clayworks-driven website.
+
+BlogWorks is not (yet) ready for a production facility. It particularly lacks checking of valid input outside of the database and the catching of invalid input sent to the database.
