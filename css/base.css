@@ -1,0 +1,141 @@
+/* basic page layout */
+body {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.userOperations {
+    position: fixed;
+    height: 40px;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #AABBFF;
+    z-index: 100;
+    margin: 0;
+}
+
+.content {
+    position: fixed;
+    overflow: auto; /* or scroll */
+    top: 40px;
+    left: 0;
+    right: 0;
+    bottom: 40px;
+    padding: 2ex;
+    z-index: 0;
+}
+
+.operations {
+    position: fixed;
+    overflow: auto;
+    height: 40px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #AAAAFF;
+    z-index: 100;
+    margin:0;
+}
+
+/* top bar */
+.userOperations h1 {
+    position: absolute;
+    margin: 0;
+    left: 1ex;
+    color: #FFFFAA;
+    font-family: Arial, sans-serif;
+    font-variant: small-caps;
+    text-transform: capitalize;
+}
+
+.userOperations div {
+    position: absolute;
+    right: 1ex;
+    display: block;
+}
+
+.userOperations div * {
+    display: inline-block;
+}
+
+/* operations */
+.operations * {
+    display: inline-block;
+}
+
+/* stats */
+.stat {
+    border-width: 4px;
+    border-style: solid;
+    border-color: #000000;
+    width: 20em;
+    padding: 0;
+    margin: 2ex;
+    float: left;
+    clear: none;
+}
+
+.stat h1 {
+    text-align: center;
+    text-transform: capitalize;
+    font-variant: small-caps;
+    margin: 0;
+    overflow: hidden;
+    padding: 1ex;
+    border-width: 0 0 2px 0;
+    border-style: solid;
+    border-color: #000000;
+}
+
+.stat ul {
+    list-style-type: none;
+    padding: 1ex;
+    margin: 1ex;
+}
+
+/* blogs */
+.blogs {
+    list-style-type: none;
+    padding: 1ex;
+    margin: 1ex;
+}
+
+/* comments */
+.comments {
+    list-style-type: none;
+    padding: 1ex;
+    margin: 1ex;
+}
+
+.comments li {
+    margin: 1em;
+}
+
+.comment {
+    border-width: 2px;
+    border-color: #000000;
+    border-style: solid;
+    padding: 1ex;
+}
+
+.comment .owner {
+    float: left;
+    clear: none;
+    display: block;
+    padding: 1ex;
+}
+
+.comment h1 {
+    float: left;
+    padding: 1ex;
+    margin: 0;
+    font-size: 1em;
+}
+
+.comment p {
+    clear: both;
+    padding: 1ex;
+}
