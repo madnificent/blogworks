@@ -1,5 +1,6 @@
 (in-package :blogworks.setup)
 
+(setf database-migrations:*db-connection-parameters* '("blogworks" "blogger" "dablog" "localhost"))
 (setf hunchentoot:*message-log-pathname* "/tmp/blog.msg.log")
 (setf hunchentoot:*access-log-pathname* "/tmp/blog.accs.log")
 (defvar server-online? nil "Did we start the server yet?")

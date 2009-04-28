@@ -1,6 +1,5 @@
 (in-package :migration-user)
 
-(setf *db-connection-parameters* '("blogworks" "blogger" "dablog" "localhost"))
 (def-query-migration 1240261019 "Adding users"
   :execute "CREATE TABLE blog_user ( user_id SERIAL PRIMARY KEY, nick text, email text, password text )"
   :revert  "DROP TABLE blog_user")
@@ -28,3 +27,4 @@
 	   "ALTER TABLE blog_user DROP CONSTRAINT sane_email"
 	   "ALTER TABLE blog_user DROP CONSTRAINT sane_passwd"
 	   "ALTER TABLE blog_user DROP CONSTRAINT valid_passwd"))
+
