@@ -1,3 +1,5 @@
+;;;; TODO: check wether or not the logged-in-user is the correct user for blog creation etc
+
 (in-package :blogworks.routing)
 
 (defhandles as-failsafe-for (failsafe &rest other-cases)
@@ -60,6 +62,9 @@
 				    ("comments" (when logged-in-user? (when post-request create-comment)))))))
 		      ("posts"
 		       (".*" (handler identifies post as post)
+			     ("edit" (when logged-in-user? 
+				       (when get-request edit-post)
+				       (when post-request update-post)))
 			     post-page)))))
 
 (in-package :blogworks.site)
@@ -238,8 +243,36 @@
   (create-new-post blog title content)
   (redirect-to-welcome))
 
+(defpage edit-post (post logged-in-user)
+  (let* ((blog (with-db (blog post)))
+	 (owner (with-db (owner blog))))
+    (unless (eql (id owner) (id logged-in-user))
+      (redirect-to-page 'post-page :page-options `(post ,post)))
+    (standard-surrounded-page 
+     (list "Edit" *title-separator* (title blog) *title-separator* (title post))
+     :content (list (form :method "post" :action (claymore.routing:handler-url 'update-post 'blog blog 'post post)
+			  (table (tr
+				  (td "title") (td (text-field "TITLE" nil :value (title post))))
+				 (tr
+				  (td "content") (td (textarea :name "CONTENT" :id "textarea1" :rows "20" :cols "60" (content post))))
+				 (tr
+				  (td (submit-button :value "update"))))))
+     :scripts '(:wysiwyg)
+     :operations `(,(link-to-page "back" 'blog-page `(blog ,blog))))))
+
+(defpage update-post (title content post logged-in-user)
+  (let* ((blog (with-db (blog post)))
+	 (owner (with-db (owner blog))))
+    (unless (eql (id owner) (id logged-in-user))
+      (redirect-to-page 'post-page :page-options `(post ,post))))
+  (setf (title post) title)
+  (setf (content post) content)
+  (update-modified-post post)
+  (redirect-to-page 'post-page :page-options `(post ,post)))
+
 (defpage post-page (post logged-in-user)
-  (let* ((blog (with-db (blog post))))
+  (let* ((blog (with-db (blog post)))
+	 (owner (with-db (owner blog))))
     (standard-surrounded-page
      (list (title blog) *title-separator* (title post))
      :content (list (content post)
@@ -248,7 +281,12 @@
 			(list (h2 "Add a comment")
 			      (new-comment-box post blog))
 			(h2 "Login to post a comment")))
-     :operations (list (link-to-page (concatenate 'string "blog: " (title blog)) 'blog-page `(blog ,blog))))))
+     :operations (let ((base (link-to-page (concatenate 'string "blog: " (title blog)) 'blog-page `(blog ,blog))))
+		   (if (and logged-in-user (eql (id owner) (id logged-in-user)))
+		       (list base (link-to-page "Edit" 'edit-post `(post ,post)))
+		       (list base))))))
+		       
+		       
 			   
 
 ;;;;;;;;;;;;;;;;;;;

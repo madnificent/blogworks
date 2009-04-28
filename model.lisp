@@ -82,3 +82,6 @@
 
 (defun get-comments-for-post (post)
   (with-db (comments post)))
+
+(defun update-modified-post (post)
+  (with-db (update-object post)))
