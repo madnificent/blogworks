@@ -99,11 +99,12 @@
 	 (claymore.html:title *title-prefix* *title-separator* subtitle)
 	 (link :rel "stylesheet" :type "text/css" :href "/css/base.css")
 	 (loop for script in scripts collect
-	      (getf *scripts* script))
-	 (google-analytics))
+	      (getf *scripts* script)))
 	(body (div :class "userOperations" (h1 subtitle) (div (user-login-operations)))
 	      (div :class "content" content)
-	      (div :class "operations" (link-to-page "Home" 'welcome) (loop for o in operations collect (list *link-separator* o))))))
+	      (div :class "operations" (link-to-page "Home" 'welcome) (loop for o in operations collect (list *link-separator* o)))
+	      (google-analytics))))
+
 
 (defpage redirect-to-welcome ()
   (redirect-to-page 'welcome))
