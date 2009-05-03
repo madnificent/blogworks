@@ -82,13 +82,25 @@
 					     "settings.ImagesDir = \"/wysiwyg/images/\";"
 					     "settings.PopupsDir = \"/wysiwyg/popups/\";"
 					     "settings.CSSFile = \"/wysiwyg/styles/wysiwyg.css\";"))))
+(defun google-analytics () 
+  (when blogworks.setup:*google-analytics-key*
+    (list (script :type "text/javascript" 
+		  "var gaJsHost = ((\"https:\" == document.location.protocol) ? \"https://ssl.\" : \"http://www.\");"
+		  "document.write(unescape(\"%3Cscript src='\" + gaJsHost + \"google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E\"));")
+	  (script :type "text/javascript"
+		  "try {"
+		  "var pageTracker = _gat._getTracker(\"" blogworks.setup:*google-analytics-key* "\" );"
+		  "pageTracker._trackPageview();"
+		  "} catch(err) {}"))))
+			       
 
 (defun standard-surrounded-page (subtitle &key operations content scripts)
   (html (head
 	 (claymore.html:title *title-prefix* *title-separator* subtitle)
 	 (link :rel "stylesheet" :type "text/css" :href "/css/base.css")
 	 (loop for script in scripts collect
-	      (getf *scripts* script)))
+	      (getf *scripts* script))
+	 (google-analytics))
 	(body (div :class "userOperations" (h1 subtitle) (div (user-login-operations)))
 	      (div :class "content" content)
 	      (div :class "operations" (link-to-page "Home" 'welcome) (loop for o in operations collect (list *link-separator* o))))))
