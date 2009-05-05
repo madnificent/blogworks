@@ -15,3 +15,6 @@
   "Set this to add google analytics support.  
    This should be set to a string that contains your google analytics key.
    An example of this is \"UA-846893-4\" (this key has been chosen at random and probably doesn't exist)")
+(defparameter *recaptcha-p* nil "Set this to T if you want to check users etc using recaptcha")
+(setf cl-recaptcha:*private-captcha-key* "YOURKEY"); "You can get your key from recaptcha.com"
+(setf cl-recaptcha:*public-captcha-key* "YOURKEY"); "You can get your key from recaptcha.com"

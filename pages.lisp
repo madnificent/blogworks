@@ -162,10 +162,12 @@
 			(text-field "NICKNAME" T) (br)
 			(strong "PASSWORD") (claymore.html.full:input :type "password" :name "PASSWORD") (br)
 			(text-field "EMAIL" T) (br)
+			(when blogworks.setup:*recaptcha-p* (cl-recaptcha:challenge))
 			(submit-button :value "create")))))
 
-(defpage create-user (nickname password email)
-  (create-new-user nickname password email)
+(defpage create-user (nickname password email recaptcha_challenge_field recaptcha_response_field)
+  (if (or (not blogworks.setup:*recaptcha-p*) (cl-recaptcha:verify-captcha recaptcha_challenge_field recaptcha_response_field (hunchentoot:remote-addr*)))
+      (create-new-user nickname password email))
   (redirect-to-page 'welcome))
 
 (defpage personal-user-page (logged-in-user)

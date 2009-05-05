@@ -11,7 +11,8 @@
   :maintainer "Aad Versteden <madnificent@gmail.com>"
   :licence "MIT"
   :description "A blogging system based on the clayworks web development stack"
-  :depends-on (:clayworks)
+  :depends-on (:clayworks
+	       :cl-recaptcha)
   :components ((:file "packages")
 	       (:file "migrations" :depends-on ("packages" "setup"))
 	       (:file "model" :depends-on ("packages" "setup"))

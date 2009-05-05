@@ -39,4 +39,4 @@
 (defpackage :blogworks.setup
   (:use :common-lisp
 	:hunchentoot)
-  (:export :*wysiwyg-path* :*css-path* :*google-analytics-key*))
+  (:export :*wysiwyg-path* :*css-path* :*google-analytics-key* :*recaptcha-p*))
