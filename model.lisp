@@ -7,7 +7,7 @@
 (defclass blog-user ()
   ((user-id :primary-key t :reader id)
    (password :accessor password)
-   (nick :reader nick)
+   (nick :accessor nick)
    (email :accessor email)
    (blogs :referenced-from blog :on owner :accessor blogs))
   (:metaclass standard-db-access-class)

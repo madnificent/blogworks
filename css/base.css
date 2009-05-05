@@ -6,7 +6,7 @@ body {
     bottom: 0;
 }
 
-.userOperations {
+.header {
     position: fixed;
     height: 40px;
     top: 0;
@@ -41,7 +41,7 @@ body {
 }
 
 /* top bar */
-.userOperations h1 {
+.header h1 {
     position: absolute;
     margin: 0;
     left: 1ex;
@@ -51,13 +51,15 @@ body {
     text-transform: capitalize;
 }
 
-.userOperations div {
-    position: absolute;
-    right: 1ex;
-    display: block;
+.operations {
+    width: 100%
 }
 
-.userOperations div * {
+.operations .login {
+    display: inline-block;
+}
+
+.operations div * {
     display: inline-block;
 }
 

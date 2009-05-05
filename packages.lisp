@@ -27,7 +27,7 @@
 	:claymore
 	:claymore.html)
   (:shadowing-import-from :blogworks.model :title)
-  (:export :welcome :new-user :create-user :login :personal-user-page :public-user-page :logout :blog-page :post-page :new-blog :create-blog :new-post :create-post :create-comment :edit-post :update-post)
+  (:export :welcome :new-user :create-user :login :personal-user-page :public-user-page :edit-user-page :update-user-page :logout :blog-page :post-page :new-blog :create-blog :new-post :create-post :create-comment :edit-post :update-post)
   (:export :nickname :password :email :logged-in-user :redirect-to-welcome :user :blog :post))
 
 (defpackage :blogworks.routing

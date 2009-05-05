@@ -44,7 +44,10 @@
 		      ("login" (when post-request login))
 		      ("logout" (when post-request logout))
 		      ("users"
-		       (when logged-in-user? personal-user-page)
+		       (when logged-in-user?
+			 ("edit" (when get-request edit-user-page)
+				 (when post-request update-user-page))
+			 personal-user-page)
 		       (".*" (handler identifies blog-user as user)
 			     public-user-page))
 		      ("blogs"
@@ -100,9 +103,12 @@
 	 (link :rel "stylesheet" :type "text/css" :href "/css/base.css")
 	 (loop for script in scripts collect
 	      (getf *scripts* script)))
-	(body (div :class "userOperations" (h1 subtitle) (div (user-login-operations)))
+	(body (div :class "header" (h1 subtitle))
 	      (div :class "content" content)
-	      (div :class "operations" (link-to-page "Home" 'welcome) (loop for o in operations collect (list *link-separator* o)))
+	      (div :class "operations" 
+		   (link-to-page "Home" 'welcome) 
+		   (loop for o in operations collect (list *link-separator* o))
+		   *link-separator* (div :class "login" (user-login-operations)))
 	      (google-analytics))))
 
 
@@ -179,9 +185,31 @@
   (standard-surrounded-page
    (list "user page for " (nick user))
    :content (list (h2 "Blogs of " (nick user)) (blogs-for-user user))
-   :operations (list (if (and logged-in-user (eql (id user) (id logged-in-user)))
-			 (list (link-to-page "New blog" 'new-blog))))))
-  
+   :operations (if (and logged-in-user (eql (id user) (id logged-in-user)))
+		   (list (link-to-page "New blog" 'new-blog)
+			 (link-to-page "Edit user" 'edit-user-page)))))
+
+(defpage edit-user-page (logged-in-user)
+  (standard-surrounded-page 
+   (list "Edit user :: " (nick logged-in-user))
+   :content (list (p "Please enter the new info of the user.  Any data that is left empty will not be set.")
+		  (form :method "post" :action (claymore.routing:handler-url 'update-user-page)
+			(text-field "nickname" T :value (nick logged-in-user)) (br)
+			(strong "password") (claymore.html.full:input :type "password" :name "password") (br)
+			(strong "password confirmation") (claymore.html.full:input :type "password" :name "password_confirmation") (br)
+			(text-field "email" T :value (email logged-in-user)) (br)
+			(submit-button :value "update")))))
+
+(defpage update-user-page (logged-in-user nickname password password_confirmation email)
+  (unless (string= "" email)
+    (setf (email logged-in-user) email))
+  (unless (or (string= "" password) (not (string= password password_confirmation)))
+    (setf (password logged-in-user) password))
+  (unless (string= "" nickname)
+    (setf (nick logged-in-user) nickname))
+  (with-db (rofl:update-object logged-in-user)) ;; this should probably be in the model :)
+  (redirect-to-page 'personal-user-page))
+		  
 ;;;;;;;;;;;;;;;;;;;
 ;; blogs
 (defun blogs-for-user (user)
