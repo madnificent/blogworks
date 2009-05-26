@@ -56,6 +56,9 @@
 				(when post-request create-blog)))
 		       (".*" (handler identifies blog as blog)
 			     blog-page
+			     ("delete"
+			      (when logged-in-user?
+				(when post-request delete-blog-page)))
 			     ("posts"
 			      (when logged-in-user?
 				(when get-request new-post)
@@ -250,9 +253,15 @@
 			(list (h2 "Posts in " (title blog))
 			      (posts-for-blog blog))
 			(h2 "No posts for " (title blog))))
-     :operations (list (if (and logged-in-user (eql (id (owner blog)) (id logged-in-user)))
-			   (link-to-page "new post" 'new-post `(blog ,blog))
-			   (link-to-page (nick owner) 'public-user-page `(user ,owner)))))))
+     :operations (if (and logged-in-user (eql (id (owner blog)) (id logged-in-user)))
+		     (list (link-to-page "new post" 'new-post `(blog ,blog))
+			   (bttn-to 'delete-blog-page "delete blog" :url-options (list 'blog blog)))
+		     (list (link-to-page (nick owner) 'public-user-page `(user ,owner)))))))
+
+(defpage delete-blog-page (blog logged-in-user)
+  (when (and blog logged-in-user (= (id (owner blog)) (id logged-in-user)))
+    (remove-object blog))
+  (redirect-to-page 'personal-user-page))
 
 ;;;;;;;;;;;;;;;;;;;
 ;; posts

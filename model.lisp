@@ -85,3 +85,8 @@
 
 (defun update-modified-post (post)
   (with-db (update-object post)))
+
+(defgeneric remove-object (object)
+  (:documentation "Removes the given object from the database"))
+(defmethod remove-object (object)
+  (with-db (delete-object object)))
