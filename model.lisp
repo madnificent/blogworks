@@ -1,92 +1,132 @@
 (in-package :blogworks.model)
 
-(defmacro with-db (&body body)
-  `(postmodern:with-connection database-migrations:*db-connection-parameters*
-     ,@body))
-
-(defclass blog-user ()
-  ((user-id :primary-key t :reader id)
-   (password :accessor password)
-   (nick :accessor nick)
-   (email :accessor email)
-   (blogs :referenced-from blog :on owner :accessor blogs))
-  (:metaclass standard-db-access-class)
+(define-persistent-class user ()
+  ((nick :read 
+	 :reader nickname
+	 :index-type string-unique-index
+	 :index-reader find-user-by-nickname
+	 :index-values all-users)
+   (pass :update
+	 :accessor password)
+   (email :update
+	  :accessor email-address
+	  :index-type string-unique-index
+	  :index-reader user-by-email
+	  :index-values all-email-addresses))
   (:documentation "Standard user of the blogging system"))
 
-(defclass blog ()
-  ((blog-id :primary-key t :reader id)
-   (owner :column owner :references blog-user :accessor owner)
-   (title :accessor title)
-   (description :accessor description)
-   (posts :referenced-from post :on blog :accessor posts))
-  (:metaclass standard-db-access-class)
+(define-persistent-class blog ()
+  ((owner :read
+	  :reader owner
+	  :index-type hash-index
+	  :index-reader blogs-of-user
+ 	  :index-values all-blogs)
+   (title :update
+	  :accessor title)
+   (name :read
+	 :reader name
+	 :index-type string-unique-index
+	 :index-reader find-blog-by-name)
+   (description :update
+		:accessor description))
   (:documentation "Represents one of the blogs of a user"))
 
-(defclass post ()
-  ((post-id :primary-key t :reader id)
-   (blog :column blog :references blog :reader blog)
-   (title :accessor title)
-   (content :accessor content)
-   (comments :referenced-from comment :on post :accessor comments))
-  (:metaclass standard-db-access-class)
+(define-persistent-class has-comments ()
+  ()
+  (:documentation "A class in which the objects may have comments"))
+
+(define-persistent-class post (has-comments)
+  ((blog :read
+	 :reader blog
+	 :index-type hash-index
+	 :index-reader posts-in-blog
+	 :index-values all-posts)
+   (title :update
+	  :accessor title)
+   (content :update
+	    :accessor content))
   (:documentation "Represents a post in the blog"))
 
-(defclass comment ()
-  ((comment-id :primary-key t :reader id)
-   (owner :references blog-user :reader owner)
-   (post :column post :references post :reader post)
-   (title :accessor title)
-   (content :accessor content))
-  (:metaclass standard-db-access-class)
+(define-persistent-class comment (has-comments)
+  ((owner :read
+	  :reader owner
+	  :index-type hash-index
+	  :index-reader comments-of)
+   (parent :read
+	   :reader parent
+	   :index-type hash-index
+	   :index-reader comments-on
+	   :index-values all-comments)
+   (title :update
+	  :accessor title)
+   (content :update
+	    :accessor content))
   (:documentation "Represents a comment on a post"))
 
+
+
+;;;;;;;;;;;;;;;;;;;
+;; helper functions
 (defun create-new-user (nick pass email)
-  (with-db (insert-object (make-object 'blog-user 'nick nick 'password pass 'email email))))
+  (make-instance 'user
+		 :nick nick
+		 :pass pass
+		 :email email))
 
 (defun find-user-by-name-and-password (nick password)
-  (with-db (first (select-using-object 
-		   (make-object 'blog-user :nick nick :password password)))))
+  (let ((user (find-user-by-nickname nick)))
+    (when (and user (string= password (user-pass user)))
+      user)))
 
-(defun find-user-by-id (id)
-  (let ((id (if (stringp id) (parse-integer id) id)))
-    (with-db (rofl:find-object 'blog-user id))))
+(defun find-post-by-blog-and-title (blog title)
+  (loop for post in (posts-in-blog blog)
+     when (string= (post-title post) title)
+     return post))
 
-(defun get-latest-users (amount)
-  (with-db (select-only-n-objects amount 'blog-user)))
+(defun latest-users (amount)
+  (loop for x from 0 below amount
+     for user in (all-users)
+     collect user)) ;; this might not guarantee to be the last users (I don't know :()
 
-(defun create-new-blog (owner title description)
-  (with-db (insert-object (make-object 'blog 'owner owner 'title title 'description description))))
+(defun create-new-blog (owner title description name)
+  (make-instance 'blog :owner owner :title title :description description :name name))
 
-(defun find-blog-by-id (id)
-  (let ((id (if (stringp id) (parse-integer id) id)))
-    (with-db (find-object 'blog id))))
-
-(defun get-latest-blogs (amount)
-  (with-db (select-only-n-objects amount 'blog)))
+(defun latest-blogs (amount)
+  (loop for x from 0 below amount
+     for blog in (all-blogs)
+     collect blog))
 
 (defun create-new-post (blog title content)
-  (with-db (insert-object (make-object 'post 'blog blog 'title title 'content content))))
+  (make-instance 'post :blog blog :title title :content content))
 
 (defun get-posts-for-blog (blog)
-  (with-db (posts blog)))
+  (posts-in-blog blog))
 
-(defun get-latest-posts (amount)
-  (with-db (select-only-n-objects amount 'post)))
-
-(defun find-post-by-id (id)
-  (let ((id (if (stringp id) (parse-integer id) id)))
-    (with-db (find-object 'post id))))
+(defun latest-posts (amount)
+  (loop for x from 0 below amount
+     for post in (all-posts)
+     collect post))
 
 (defun create-new-comment (post title content owner)
-  (with-db (insert-object (make-object 'comment 'owner owner 'post post 'title title 'content content))))
+  (make-instance 'comment :parent post :title title :content content :owner owner))
 
 (defun get-comments-for-post (post)
-  (with-db (comments post)))
+  (comments-on post))
 
-(defun update-modified-post (post)
-  (with-db (update-object post)))
 
 (defgeneric remove-object (object)
-  (:documentation "Removes the given object from the database"))
+  (:documentation "Removes an object from the store"))
 (defmethod remove-object (object)
-  (with-db (delete-object object)))
+  (delete-object object))
+(defmethod remove-object :before ((user user))
+  (loop for blog in (blogs-of-user user)
+      do (remove-object blog))
+  (loop for comment in (comments-of user)
+     do (remove-object comment)))
+(defmethod remove-object :before ((blog blog))
+  (loop for post in (posts-in-blog blog)
+     do (remove-object post)))
+(defmethod remove-object :before ((commentable has-comments))
+  (loop for comment in (comments-on commentable)
+     do (remove-object comment)))
+

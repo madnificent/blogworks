@@ -14,7 +14,6 @@
   :depends-on (:clayworks
 	       :cl-recaptcha)
   :components ((:file "packages")
-	       (:file "migrations" :depends-on ("packages" "setup"))
-	       (:file "model" :depends-on ("packages" "setup"))
-	       (:file "setup" :depends-on ("packages"))
-	       (:file "pages" :depends-on ("packages" "model"))))
+	       (:file "setup" :depends-on ("packages" "model"))
+	       (:file "model" :depends-on ("packages"))
+	       (:file "pages" :depends-on ("packages" "model" "setup"))))
