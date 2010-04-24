@@ -1,5 +1,11 @@
 (in-package :blogworks.model)
 
+(defun hash-password (password)
+  "Creates a hashed version of the given password string"
+  (declare (type string password))
+  (ironclad:byte-array-to-hex-string 
+   (ironclad:digest-sequence :sha256 (ironclad:ascii-string-to-byte-array password))))
+
 (define-persistent-class user ()
   ((nick :read 
 	 :reader nickname
@@ -7,13 +13,18 @@
 	 :index-reader find-user-by-nickname
 	 :index-values all-users)
    (pass :update
-	 :accessor password)
+	 :reader password)
    (email :update
 	  :accessor email-address
 	  :index-type string-unique-index
 	  :index-reader user-by-email
 	  :index-values all-email-addresses))
   (:documentation "Standard user of the blogging system"))
+(defmethod (setf password) (password (user user))
+  (with-slots (pass) user
+    (setf pass (hash-password password))))
+(defmethod initialize-instance :after ((user user) &key pass)
+  (setf (password user) pass))
 
 (define-persistent-class blog ()
   ((owner :read
@@ -75,7 +86,7 @@
 
 (defun find-user-by-name-and-password (nick password)
   (let ((user (find-user-by-nickname nick)))
-    (when (and user (string= password (user-pass user)))
+    (when (and user (equal (hash-password password) (user-pass user)))
       user)))
 
 (defun find-post-by-blog-and-title (blog title)

@@ -12,7 +12,8 @@
   :licence "MIT"
   :description "A blogging system based on the clayworks web development stack"
   :depends-on (:clayworks
-	       :cl-recaptcha)
+	       :cl-recaptcha
+	       :ironclad)
   :components ((:file "packages")
 	       (:file "setup" :depends-on ("packages" "model"))
 	       (:file "model" :depends-on ("packages"))
